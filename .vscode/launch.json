@@ -5,7 +5,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Abrir Asistencia",
-            "url": "http://localhost:8080/asistencia.html",
+            "url": "http://localhost:8080/index.html",
             "webRoot": "${workspaceFolder}",
             "preLaunchTask": "Iniciar servidor HTTP"
         }
