@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Abrir Asistencia",
+            "url": "http://localhost:8080/asistencia.html",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "Iniciar servidor HTTP"
+        }
+    ]
+}
