@@ -11,19 +11,6 @@
     header h1 { font-size: 1.25rem; font-weight: 600; }
     .container { max-width: 1300px; margin: 24px auto; padding: 0 16px; }
 
-    /* Setup panel */
-    .setup-panel { background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 28px 32px; max-width: 640px; margin: 0 auto; }
-    .setup-panel h2 { font-size: 1.1rem; margin-bottom: 8px; color: #2d3561; }
-    .setup-panel p { font-size: 0.88rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
-    .steps { margin: 0 0 20px 0; padding: 0; list-style: none; counter-reset: step; }
-    .steps li { counter-increment: step; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; font-size: 0.88rem; color: #333; }
-    .steps li::before { content: counter(step); min-width: 22px; height: 22px; background: #2d3561; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-    .steps li span { line-height: 1.45; }
-    .steps code { background: #e8eaf6; padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; font-family: monospace; color: #3949ab; }
-    .url-input-row { display: flex; gap: 8px; }
-    .url-input-row input { flex: 1; padding: 9px 12px; border: 1.5px solid #ddd; border-radius: 7px; font-size: 0.88rem; }
-    .url-input-row input:focus { outline: none; border-color: #2d3561; }
-
     /* Filters */
     .filters { background: white; padding: 16px 20px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 20px; }
     .filter-group { display: flex; flex-direction: column; gap: 5px; }
@@ -35,9 +22,6 @@
     .btn-primary:hover { background: #3d4571; }
     .btn-secondary { background: #eceff1; color: #546e7a; }
     .btn-secondary:hover { background: #cfd8dc; }
-    .btn-danger { background: #ffebee; color: #c62828; }
-    .btn-danger:hover { background: #ffcdd2; }
-
     /* Stats */
     .stats { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
     .stat { background: white; padding: 14px 20px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); min-width: 110px; }
@@ -70,7 +54,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .error { background: #ffebee; color: #c62828; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #c62828; font-size: 0.88rem; }
     .empty { text-align: center; padding: 60px 20px; color: #90a4ae; }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -79,45 +62,22 @@
   <h1>Asistencia por Maestro</h1>
 </header>
 <div class="container">
-
-  <!-- Panel de configuración (se muestra hasta que el usuario pegue la URL) -->
-  <div id="setup-panel" class="setup-panel">
-    <h2>Configurar fuente de datos</h2>
-    <p>Para conectar con tu planilla de Google Sheets seguí estos pasos. Solo se hace una vez — se guarda en el navegador.</p>
-    <ol class="steps">
-      <li><span>En Google Sheets abrí el menú <code>Archivo</code> → <code>Compartir</code> → <code>Publicar en la web</code></span></li>
-      <li><span>En "Documento completo" seleccioná la hoja que tiene los datos (la que tiene Fecha, Maestro/a, Nombre, etc.)</span></li>
-      <li><span>En el formato elegí <code>Valores separados por comas (.csv)</code></span></li>
-      <li><span>Hacé clic en <strong>Publicar</strong> y copiá la URL que aparece</span></li>
-    </ol>
-    <div id="setup-error" class="error hidden"></div>
-    <div class="url-input-row">
-      <input type="text" id="csv-url-input" placeholder="Pegá acá la URL del CSV publicado..." />
-      <button class="btn btn-primary" onclick="saveAndLoad()">Conectar</button>
+  <div class="filters">
+    <div class="filter-group">
+      <label>Maestro/a</label>
+      <select id="sel-maestro"></select>
     </div>
-  </div>
-
-  <!-- App principal (oculta hasta conectar) -->
-  <div id="app" class="hidden">
-    <div class="filters">
-      <div class="filter-group">
-        <label>Maestro/a</label>
-        <select id="sel-maestro"></select>
-      </div>
-      <div class="filter-group">
-        <label>Mes</label>
-        <select id="sel-mes"></select>
-      </div>
-      <button class="btn btn-primary" onclick="renderTable()">Ver asistencia</button>
-      <button class="btn btn-secondary" onclick="loadData()">↺ Actualizar</button>
-      <button class="btn btn-danger" onclick="resetConfig()" title="Cambiar planilla">Desconectar</button>
+    <div class="filter-group">
+      <label>Mes</label>
+      <select id="sel-mes"></select>
     </div>
-    <div id="output"></div>
+    <button class="btn btn-primary" onclick="renderTable()">Ver asistencia</button>
+    <button class="btn btn-secondary" onclick="loadData()">↺ Actualizar</button>
   </div>
-
+  <div id="output"></div>
 </div>
 <script>
-const STORAGE_KEY = 'asistencia_csv_url';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnpSR2ceYWpR-79SR5hKZc-6iE1Cutq7fJfsywXmSaiuuvg48zbJVTVTYNgMbSVCTIwSv5RVypw95K/pub?gid=816331834&single=true&output=csv';
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 let allData = [];
 
@@ -161,78 +121,19 @@ function normalizeRow(row) {
 }
 
 async function loadData() {
-  const url = localStorage.getItem(STORAGE_KEY);
-  if (!url) { showSetup(); return; }
-
   document.getElementById('output').innerHTML = '<div class="loading">Cargando datos...</div>';
-
   try {
-    const res = await fetch(url + '&_t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Error HTTP ${res.status}. La URL puede haber expirado.`);
+    const res = await fetch(CSV_URL + '&_t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
     const text = await res.text();
-    if (text.includes('<html') || text.includes('<!DOCTYPE')) {
-      throw new Error('La URL devuelve HTML en lugar de CSV. Asegurate de elegir formato CSV al publicar.');
-    }
+    if (text.includes('<html') || text.includes('<!DOCTYPE')) throw new Error('La planilla no está publicada como CSV.');
     allData = parseCSV(text).map(normalizeRow).filter(r => r.Fecha && r.Maestro && r.Nombre && r.Estado);
-    if (allData.length === 0) throw new Error('No se encontraron datos. Verificá que publicaste la hoja correcta en formato CSV.');
+    if (allData.length === 0) throw new Error('No se encontraron datos en la planilla.');
     populateFilters();
     renderTable();
   } catch (e) {
     document.getElementById('output').innerHTML = `<div class="error"><strong>Error al cargar:</strong> ${e.message}</div>`;
   }
-}
-
-function toCsvUrl(url) {
-  // Convierte pubhtml → pub?output=csv, y agrega output=csv si falta
-  url = url.replace('/pubhtml', '/pub');
-  if (!url.includes('output=csv')) {
-    url += (url.includes('?') ? '&' : '?') + 'output=csv';
-  }
-  return url;
-}
-
-async function saveAndLoad() {
-  let url = document.getElementById('csv-url-input').value.trim();
-  const errEl = document.getElementById('setup-error');
-  errEl.classList.add('hidden');
-
-  if (!url) { errEl.textContent = 'Pegá la URL del CSV publicado.'; errEl.classList.remove('hidden'); return; }
-  if (!url.startsWith('http')) { errEl.textContent = 'La URL debe empezar con https://'; errEl.classList.remove('hidden'); return; }
-  url = toCsvUrl(url);
-
-  // Validar que devuelve CSV
-  try {
-    const res = await fetch(url + '&_t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-    const text = await res.text();
-    if (text.includes('<html') || text.includes('<!DOCTYPE')) throw new Error('La URL devuelve HTML, no CSV. Verificá los pasos.');
-    const rows = parseCSV(text).map(normalizeRow).filter(r => r.Fecha);
-    if (rows.length === 0) throw new Error('No se encontraron filas con datos. Revisá que publicaste la hoja correcta.');
-    localStorage.setItem(STORAGE_KEY, url);
-    allData = rows.filter(r => r.Maestro && r.Nombre && r.Estado);
-    showApp();
-    populateFilters();
-    renderTable();
-  } catch (e) {
-    errEl.textContent = e.message;
-    errEl.classList.remove('hidden');
-  }
-}
-
-function showSetup() {
-  document.getElementById('setup-panel').classList.remove('hidden');
-  document.getElementById('app').classList.add('hidden');
-}
-
-function showApp() {
-  document.getElementById('setup-panel').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-}
-
-function resetConfig() {
-  localStorage.removeItem(STORAGE_KEY);
-  allData = [];
-  showSetup();
 }
 
 function parseDate(str) {
@@ -343,13 +244,7 @@ function renderTable() {
   document.getElementById('output').innerHTML = html;
 }
 
-// Arranque
-if (localStorage.getItem(STORAGE_KEY)) {
-  showApp();
-  loadData();
-} else {
-  showSetup();
-}
+loadData();
 </script>
 </body>
 </html>
